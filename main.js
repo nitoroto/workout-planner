@@ -2,48 +2,48 @@ import Vue from 'vue';
 import App from './App.vue';
 import VueRouter from 'vue-router';
 import Vuex from 'vuex';
-import routes from './routes'; 
+import workoutRoutes from './routes';
 import axios from 'axios';
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
 
-const router = new VueRouter({
+const appRouter = new VueRouter({
   mode: 'history',
-  routes
+  routes: workoutRoutes
 });
 
-const store = new Vuex.Store({
+const workoutStore = new Vuex.Store({
   state: {
-    user: null,
-    workouts: []
+    currentUser: null,
+    availableWorkouts: []
   },
   mutations: {
-    setUser(state, user) {
-      state.user = user;
+    updateCurrentUser(state, user) {
+      state.currentUser = user;
     },
-    setWorkouts(state, workouts) {
-      state.workouts = workouts;
+    updateAvailableWorkouts(state, workouts) {
+      state.availableWorkouts = workouts;
     }
   },
   actions: {
-    fetchUser({ commit }) {
+    retrieveCurrentUser({ commit }) {
       axios.get(`${process.env.VUE_APP_API_URL}/user`, {
         headers: {
           Authorization: `Bearer ${process.env.VUE_APP_API_TOKEN}`
         }
       }).then(response => {
-        commit('setUser', response.data);
-      }).catch(error => console.error('Error fetching user:', error));
+        commit('updateCurrentUser', response.data);
+      }).catch(error => console.error('Error retrieving user:', error));
     },
-    fetchWorkouts({ commit }) {
+    retrieveAvailableWorkouts({ commit }) {
       axios.get(`${process.env.VUE_APP_API_URL}/workouts`, {
         headers: {
           Authorization: `Bearer ${process.env.VUE_APP_API_TOKEN}`
         }
       }).then(response => {
-        commit('setWorkouts', response.data);
-      }).catch(error => console.error('Error fetching workouts:', error));
+        commit('updateAvailableWorkouts', response.data);
+      }).catch(error => console.error('Error retrieving workouts:', error));
     }
   }
 });
@@ -52,7 +52,7 @@ axios.defaults.baseURL = process.env.VUE_APP_API_BASE_URL;
 axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.VUE_APP_API_TOKEN}`;
 
 new Vue({
-  router,
-  store,
+  router: appRouter,
+  store: workoutStore,
   render: h => h(App)
 }).$mount('#app');
