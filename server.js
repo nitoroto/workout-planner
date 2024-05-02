@@ -1,68 +1,42 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
 dotenv.config();
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
+function handleError(error, res, next) {
+    console.error(error.stack);
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || 'Internal Server Error';
+    res.status(statusCode).send({ error: errorMessage });
+}
+
 app.get('/', (req, res) => {
-  try {
     res.send('Workout Planner Server is running');
-  } catch (error) {
-    next(error); // Pass error to the next middleware
-  }
 });
 
-app.post('/login', (req, res, next) => {
-  try {
-    // Simulate login logic
+app.post('/login', (req, res) => {
     res.send('Login route');
-  } catch (error) {
-    next(error); // Pass error to the next middleware
-  }
 });
 
-app.post('/register', (req, res, next) => {
-  try {
-    // Simulate registration logic
+app.post('/register', (req, res) => {
     res.send('Register route');
-  } catch (error) {
-    next(error); // Pass error to error handling middleware
-  }
 });
 
-app.post('/workout', (req, res, next) => {
-  try {
-    // Simulate workout creation logic
+app.post('/workout', (req, res) => {
     res.send('Workout creation route');
-  } catch (error) {
-    next(error); // Pass error to the error handling middleware
-  }
 });
 
-app.get('/workouts', (req, res, next) => {
-  try {
-    // Simulate workout retrieval logic
+app.get('/workouts', (req, res) => {
     res.send('Workouts retrieval route');
-  } catch (error) {
-    next(error); // Pass error to the error handling middleware
-  }
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  // Determine error status code or default to 500
-  const statusCode = err.statusCode || 500;
-  // Determine error message
-  const errorMessage = err.message || 'Internal Server Error';
-  // Send error response
-  res.status(statusCode).send({ error: errorMessage });
+    handleError(err, res, next);
 });
 
 const PORT = process.env.PORT || 3000;
