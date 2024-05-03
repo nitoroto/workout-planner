@@ -8,36 +8,36 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-function handleError(error, res, next) {
+function logAndHandleError(error, response, next) {
     console.error(error.stack);
-    const statusCode = error.statusCode || 500;
-    const errorMessage = error.message || 'Internal Server Error';
-    res.status(statusCode).send({ error: errorMessage });
+    const responseStatusCode = error.statusCode || 500;
+    const responseErrorMessage = error.message || 'Internal Server Error';
+    response.status(responseStatusCode).send({ error: responseErrorMessage });
 }
 
-app.get('/', (req, res) => {
-    res.send('Workout Planner Server is running');
+app.get('/', (request, response) => {
+    response.send('Workout Planner Server is running');
 });
 
-app.post('/login', (req, res) => {
-    res.send('Login route');
+app.post('/login', (request, response) => {
+    response.send('Login route');
 });
 
-app.post('/register', (req, res) => {
-    res.send('Register route');
+app.post('/register', (request, response) => {
+    response.send('Register route');
 });
 
-app.post('/workout', (req, res) => {
-    res.send('Workout creation route');
+app.post('/workout', (request, response) => {
+    response.send('Create Workout route');
 });
 
-app.get('/workouts', (req, res) => {
-    res.send('Workouts retrieval route');
+app.get('/workouts', (request, response) => {
+    response.send('Retrieve Workouts route');
 });
 
-app.use((err, req, res, next) => {
-    handleError(err, res, next);
+app.use((error, request, response, next) => {
+    logAndHandleError(error, response, next);
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const serverPort = process.env.PORT || 3000;
+app.listen(serverPort, () => console.log(`Server running on port ${serverPort}`));
