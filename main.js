@@ -16,7 +16,9 @@ const appRouter = new VueRouter({
 const workoutStore = new Vuex.Store({
   state: {
     currentUser: null,
-    availableWorkouts: []
+    availableWorkouts: [],
+    error: null,
+    workoutsError: null
   },
   mutations: {
     updateCurrentUser(state, user) {
@@ -24,6 +26,16 @@ const workoutStore = new Vuex.Store({
     },
     updateAvailableWorkouts(state, workouts) {
       state.availableWorkouts = workouts;
+    },
+    setError(state, errorMessage) {
+      state.error = errorMessage;
+    },
+    setWorkoutsError(state, errorMessage) {
+      state.workoutsError = errorMessage;
+    },
+    clearErrors(state) {
+      state.error = null;
+      state.workoutsError = null;
     }
   },
   actions: {
@@ -34,7 +46,11 @@ const workoutStore = new Vuex.Store({
         }
       }).then(response => {
         commit('updateCurrentUser', response.data);
-      }).catch(error => console.error('Error retrieving user:', error));
+        commit('clearErrors');
+      }).catch(error => {
+        console.error('Error retrieving user:', error);
+        commit('setError', 'Failed to retrieve user data.');
+      });
     },
     retrieveAvailableWorkouts({ commit }) {
       axios.get(`${process.env.VUE_APP_API_URL}/workouts`, {
@@ -43,7 +59,11 @@ const workoutStore = new Vuex.Store({
         }
       }).then(response => {
         commit('updateAvailableWorkouts', response.data);
-      }).catch(error => console.error('Error retrieving workouts:', error));
+        commit('clearErrors');
+      }).catch(error => {
+        console.error('Error retrieving workouts:', error);
+        commit('setWorkoutsError', 'Failed to retrieve workouts.');
+      });
     }
   }
 });
