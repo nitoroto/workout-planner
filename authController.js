@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error(err));
+  .catch(err => console.error('Database connection error:', err));
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -76,13 +76,18 @@ const register = async (req, res) => {
     await user.save();
     return res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
 
 const login = async (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
-    if (err || !user) {
+    if (err) {
+      console.error("Login error:", err);
+      return res.status(400).json({ message: 'An error occurred during login.', error: err });
+    }
+    if (!user) {
       return res.status(400).json({
         message: info ? info.message : 'Login failed',
         user: user
@@ -90,7 +95,8 @@ const login = async (req, res, next) => {
     }
     req.login(user, { session: false }, (err) => {
       if (err) {
-        res.send(err);
+        console.error("Login error:", err);
+        return res.send(err);
       }
       const payload = {
         sub: user._id,
