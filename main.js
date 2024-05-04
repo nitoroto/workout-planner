@@ -13,6 +13,15 @@ const appRouter = new VueRouter({
   routes: workoutRoutes
 });
 
+const logger = {
+  log(message) {
+    console.log(message);
+  },
+  error(message) {
+    console.error(message);
+  }
+};
+
 const workoutStore = new Vuex.Store({
   state: {
     currentUser: null,
@@ -45,10 +54,11 @@ const workoutStore = new Vuex.Store({
           Authorization: `Bearer ${process.env.VUE_APP_API_TOKEN}`
         }
       }).then(response => {
+        logger.log('User data retrieved successfully.');
         commit('updateCurrentUser', response.data);
         commit('clearErrors');
       }).catch(error => {
-        console.error('Error retrieving user:', error);
+        logger.error('Error retrieving user: ' + error);
         commit('setError', 'Failed to retrieve user data.');
       });
     },
@@ -58,10 +68,11 @@ const workoutStore = new Vuex.Store({
           Authorization: `Bearer ${process.env.VUE_APP_API_TOKEN}`
         }
       }).then(response => {
+        logger.log('Workouts retrieved successfully.');
         commit('updateAvailableWorkouts', response.data);
         commit('clearErrors');
       }).catch(error => {
-        console.error('Error retrieving workouts:', error);
+        logger.error('Error retrieving workouts: ' + error);
         commit('setWorkoutsError', 'Failed to retrieve workouts.');
       });
     }
