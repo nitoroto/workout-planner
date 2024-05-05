@@ -36,7 +36,11 @@ router.get('/workouts', async (req, res) => {
 
 router.patch('/workouts/:id', async (req, res) => {
   try {
-    const workout = await Workout.findOneAndUpdate({ _id: req.params.id, user: req.user._id }, req.body, { new: true });
+    const workout = await Workout.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id }, 
+      req.body, 
+      { new: true }
+    );
     if (!workout) {
       return res.status(404).send();
     }
