@@ -15,10 +15,10 @@ const appRouter = new VueRouter({
 
 const logger = {
   log(message) {
-    console.log(message);
+    console.log(new Date().toISOString() + ": " + message);
   },
-  error(message) {
-    console.error(message);
+  error(message, error) {
+    console.error(new Date().toISOString() + ": " + message, error.response ? error.response : error);
   }
 };
 
@@ -58,8 +58,9 @@ const workoutStore = new Vuex.Store({
         commit('updateCurrentUser', response.data);
         commit('clearErrors');
       }).catch(error => {
-        logger.error('Error retrieving user: ' + error);
-        commit('setError', 'Failed to retrieve user data.');
+        const detailedError = `Error retrieving user: ${error.response ? error.response.data.error : error.message}`;
+        logger.error(detailedError, error);
+        commit('setError', 'Failed to retrieve user data. Please try again later.');
       });
     },
     retrieveAvailableWorkouts({ commit }) {
@@ -72,8 +73,9 @@ const workoutStore = new Vuex.Store({
         commit('updateAvailableWorkouts', response.data);
         commit('clearErrors');
       }).catch(error => {
-        logger.error('Error retrieving workouts: ' + error);
-        commit('setWorkoutsError', 'Failed to retrieve workouts.');
+        const detailedError = `Error retrieving workouts: ${error.response ? error.response.data.error : error.message}`;
+        logger.error(detailedError, error);
+        commit('setWorkoutsError', 'Failed to retrieve workouts. Please try again later.');
       });
     }
   }
