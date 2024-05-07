@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const NodeCache = require("node-cache");
-const bcryptCache = new NodeCache({ stdTTL: 100, checkperiod: 120 }); // Cache TTL is 100 seconds and checks every 120 seconds
+const md5 = require("md5");
+const bcryptCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI, {
@@ -53,7 +54,8 @@ passport.use('local', new LocalStrategy({
         if (!user) {
             return done(null, false, { message: 'Incorrect username.' });
         }
-        const cacheKey = `${username}-${password}`;
+        const hashedPassword = md5(password);
+        const cacheKey = `${username}-${hashedPassword}`;
         let isMatch = bcryptCache.get(cacheKey);
         if (isMatch === undefined) {
             isMatch = await bcrypt.compare(password, user.password);
