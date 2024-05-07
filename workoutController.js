@@ -10,6 +10,11 @@ const logRequest = (type, route) => {
   console.log(`${new Date().toISOString()} - ${type} request to ${route}`);
 };
 
+const errorHandler = (error, res, operation) => {
+  console.error(`Error during ${operation}: ${error.message}`, error);
+  res.status(500).send({ error: `An error occurred during ${operation}. Please try again.` });
+};
+
 router.post('/workouts', async (req, res) => {
   try {
     const workout = new Workout({
@@ -20,7 +25,8 @@ router.post('/workouts', async (req, res) => {
     logRequest('POST', '/workouts');
     res.status(201).send(workout);
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Error creating workout:', error);
+    res.status(400).send({ error: 'Failed to create workout. Please check the data provided.' });
   }
 });
 
@@ -30,24 +36,33 @@ router.get('/workouts', async (req, res) => {
     logRequest('GET', '/workouts');
     res.send(workouts);
   } catch (error) {
-    res.status(500).send(error);
+    errorHandler(error, res, 'fetching workouts');
   }
 });
 
 router.patch('/workouts/:id', async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name', 'duration', 'intensity'];
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+
+  if (!isValidOperation) {
+    return res.status(400).send({ error: 'Invalid updates!' });
+  }
+
   try {
-    const workout = await Workout.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id }, 
-      req.body, 
-      { new: true }
-    );
+    const workout = await Workout.findOne({ _id: req.params.id, user: req.user._id });
+    
     if (!workout) {
       return res.status(404).send();
     }
+    
+    updates.forEach((update) => workout[update] = req.body[update]);
+    await workout.save();
+    
     logRequest('PATCH', `/workouts/${req.params.id}`);
     res.send(workout);
   } catch (error) {
-    res.status(400).send(error);
+    errorHandler(error, res, 'updating the workout');
   }
 });
 
@@ -60,7 +75,7 @@ router.delete('/workouts/:id', async (req, res) => {
     logRequest('DELETE', `/workouts/${req.params.id}`);
     res.send(workout);
   } catch (error) {
-    res.status(500).send(error);
+    errorHandler(error, res, 'deleting the workout');
   }
 });
 
