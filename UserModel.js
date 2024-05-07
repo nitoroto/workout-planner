@@ -1,28 +1,29 @@
 const mongoose = require('mongoose');
+
 const UserSchema = new mongoose.Schema({
-  // ...existing fields...
-  workouts: [{
+  workoutList: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Workout',
     index: true,
   }],
 });
 
-const User = mongoose.model('User', UserSchema);
+const UserModel = mongoose.model('User', UserSchema);
 
-async function addWorkoutToUser(userId, workoutId) {
+async function linkWorkoutToUser(userId, workoutId) {
   try {
-    const user = await User.findById(userId);
+    const user = await UserModel.findById(userId);
     if (!user) throw new Error('User not found');
-    user.workouts.push(workoutId);
+    
+    user.workoutList.push(workoutId);
     await user.save();
-    console.log('Workout added successfully.');
+    console.log('Workout added successfully to user.');
   } catch (error) {
-    console.error('Error adding workout to user:', error.message);
+    console.error('Error while linking workout to user:', error.message);
   }
 }
 
 module.exports = {
-  User,
-  addWorkoutToUser,
+  UserModel,
+  linkWorkoutToUser,
 };
