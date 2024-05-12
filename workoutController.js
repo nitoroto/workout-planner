@@ -15,7 +15,7 @@ const errorHandler = (error, res, operation) => {
   res.status(500).send({ error: `An error occurred during ${operation}. Please try again.` });
 };
 
-router.post('/workouts', async (req, res) => {
+async function createWorkout(req, res) {
   try {
     const workout = new Workout({
       ...req.body,
@@ -28,9 +28,9 @@ router.post('/workouts', async (req, res) => {
     console.error('Error creating workout:', error);
     res.status(400).send({ error: 'Failed to create workout. Please check the data provided.' });
   }
-});
+}
 
-router.get('/workouts', async (req, res) => {
+async function fetchWorkouts(req, res) {
   try {
     const workouts = await Workout.find({ user: req.user._id });
     logRequest('GET', '/workouts');
@@ -38,9 +38,9 @@ router.get('/workouts', async (req, res) => {
   } catch (error) {
     errorHandler(error, res, 'fetching workouts');
   }
-});
+}
 
-router.patch('/workouts/:id', async (req, res) => {
+async function updateWorkout(req, res) {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['name', 'duration', 'intensity'];
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
@@ -64,9 +64,9 @@ router.patch('/workouts/:id', async (req, res) => {
   } catch (error) {
     errorHandler(error, res, 'updating the workout');
   }
-});
+}
 
-router.delete('/workouts/:id', async (req, res) => {
+async function deleteWorkout(req, res) {
   try {
     const workout = await Workout.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!workout) {
@@ -77,6 +77,11 @@ router.delete('/workouts/:id', async (req, res) => {
   } catch (error) {
     errorHandler(error, res, 'deleting the workout');
   }
-});
+}
+
+router.post('/workouts', createWorkout);
+router.get('/workouts', fetchWorkouts);
+router.patch('/workouts/:id', updateWorkout);
+router.delete('/workouts/:id', deleteWorkout);
 
 module.exports = router;
